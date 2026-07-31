@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniUtils — Signal Toolkit</title>
+  <meta name="description" content="Three focused browser tools: text repeater, secret link encoder, and password-protected QR studio.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- jsQR Decoder Library -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+</head>
+<body>
+
+  <!-- Mobile top bar -->
+  <div class="mobile-bar">
+    <div class="mobile-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" class="trace-mark">
+          <path class="trace-path" d="M2 20 L10 20 L14 8 L18 32 L22 14 L26 26 L30 20 L38 20" />
+        </svg>
+      </span>
+      OmniUtils
+    </div>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div class="shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" class="trace-mark">
+            <path class="trace-path" d="M2 20 L10 20 L14 8 L18 32 L22 14 L26 26 L30 20 L38 20" />
+          </svg>
+        </span>
+        <div class="brand-text">
+          <span class="brand-name">OmniUtils</span>
+          <span class="brand-tag">signal toolkit</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-link active" data-tab="repeater" onclick="switchTab('repeater', this)">
+          <span class="nav-index">01</span>
+          <span class="nav-icon"><i class="fa-solid fa-repeat"></i></span>
+          <span class="nav-label">Text Repeater</span>
+        </button>
+        <button class="nav-link" data-tab="link-gen" onclick="switchTab('link-gen', this)">
+          <span class="nav-index">02</span>
+          <span class="nav-icon"><i class="fa-solid fa-link"></i></span>
+          <span class="nav-label">Link Encoder</span>
+        </button>
+        <button class="nav-link" data-tab="qr-sec" onclick="switchTab('qr-sec', this)">
+          <span class="nav-index">03</span>
+          <span class="nav-icon"><i class="fa-solid fa-qrcode"></i></span>
+          <span class="nav-label">QR Studio</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <i class="fa-solid fa-lock"></i>
+        <span>Runs entirely in your browser. Nothing leaves this tab.</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="container">
+
+      <!-- Section 1: Text Repeater -->
+      <section id="repeater" class="tab-content active">
+        <header class="panel-header">
+          <span class="crumb">OmniUtils / Module 01</span>
+          <h1>Text Repeater</h1>
+          <p class="subtitle">Repeat a string as many times as you need, with control over the separator.</p>
+        </header>
+
+        <div class="card">
+          <div class="form-group">
+            <label for="repeatText">Text to repeat</label>
+            <textarea id="repeatText" placeholder="Type or paste the text you want repeated..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="repeatCount">Repeat count</label>
+              <input type="number" id="repeatCount" value="10" min="1" max="10000">
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="addNewline" checked>
+              <label for="addNewline">Separate with a line break</label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="generateRepeatedText()">
+            <i class="fa-solid fa-play"></i> Generate output
+          </button>
+
+          <div class="result-box">
+            <div class="result-header">
+              <span>Output</span>
+              <button class="btn btn-ghost btn-sm" onclick="copyRepeatedText()">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
+            <textarea id="repeatOutput" class="mono-field" readonly placeholder="Your repeated text will appear here..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Custom Link Generator & Decoder -->
+      <section id="link-gen" class="tab-content">
+        <header class="panel-header">
+          <span class="crumb">OmniUtils / Module 02</span>
+          <h1>Secret Link Encoder</h1>
+          <p class="subtitle">Wrap text into a shareable link string, then decode it back on this page.</p>
+        </header>
+
+        <div class="card">
+          <div class="sub-section">
+            <h2><span class="sub-index">A</span> Create a link</h2>
+            <div class="form-group">
+              <label for="secretText">Text to encode</label>
+              <input type="text" id="secretText" placeholder="Enter text to wrap into a link...">
+            </div>
+            <button class="btn btn-primary" onclick="generateSecretLink()">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate link
+            </button>
+
+            <div class="input-with-button">
+              <input type="text" id="generatedLink" class="mono-field" readonly placeholder="Your generated link will appear here...">
+              <button class="btn btn-ghost" onclick="copyGeneratedLink()">Copy</button>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="sub-section">
+            <h2><span class="sub-index">B</span> Decode a link</h2>
+            <p class="hint">Paste a link created above to reveal the hidden text.</p>
+            <div class="form-group">
+              <label for="inputLinkToDecode">Link to decode</label>
+              <input type="text" id="inputLinkToDecode" placeholder="omni://decode?data=...">
+            </div>
+            <button class="btn btn-primary" onclick="decodeSecretLink()">
+              <i class="fa-solid fa-unlock"></i> Reveal text
+            </button>
+
+            <div class="decoded-result" id="decodedOutput"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Password Encrypted QR Studio -->
+      <section id="qr-sec" class="tab-content">
+        <header class="panel-header">
+          <span class="crumb">OmniUtils / Module 03</span>
+          <h1>Password-Protected QR Studio</h1>
+          <p class="subtitle">Encrypt text with AES before turning it into a QR code, and decrypt it back from an image.</p>
+        </header>
+
+        <div class="card">
+          <div class="qr-grid">
+            <!-- QR Generator Side -->
+            <div class="qr-col">
+              <h2><i class="fa-solid fa-lock"></i> Encrypt &amp; create</h2>
+              <div class="form-group">
+                <label for="qrText">Hidden text</label>
+                <textarea id="qrText" placeholder="Enter the secret content..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="qrPass">Password</label>
+                <input type="password" id="qrPass" placeholder="Set a password">
+              </div>
+              <button class="btn btn-primary" onclick="generateEncryptedQR()">
+                <i class="fa-solid fa-qrcode"></i> Generate QR code
+              </button>
+              <div id="qrcode" class="qr-output-box"></div>
+              <div class="qr-actions">
+                <button class="btn btn-ghost" id="downloadQrBtn" onclick="downloadQRCode()" disabled>
+                  <i class="fa-solid fa-download"></i> Download QR code
+                </button>
+              </div>
+            </div>
+
+            <!-- QR Decoder Side -->
+            <div class="qr-col">
+              <h2><i class="fa-solid fa-key"></i> Upload &amp; decrypt</h2>
+              <div class="form-group">
+                <label for="qrFileInput">QR code image</label>
+                <input type="file" id="qrFileInput" accept="image/*">
+              </div>
+              <div class="form-group">
+                <label for="qrDecryptPass">Password</label>
+                <input type="password" id="qrDecryptPass" placeholder="Enter the decryption password">
+              </div>
+              <button class="btn btn-primary" onclick="decryptUploadedQR()">
+                <i class="fa-solid fa-eye"></i> Decrypt &amp; reveal
+              </button>
+
+              <div class="result-box margin-top">
+                <div class="result-header">Decrypted text</div>
+                <div id="qrDecryptedResult" class="decrypted-text-box mono-field">No QR code decrypted yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Action completed successfully!</div>
+
+  <!-- AES Encryption Helper Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
